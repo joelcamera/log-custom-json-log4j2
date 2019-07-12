@@ -57,7 +57,7 @@ public class ControllerTests {
     }
 
     @Test
-    public void whenThePostHasNonJsonBody_returnsOk() throws Exception {
+    public void whenThePostHasNonJsonBody_returnsBadRequest() throws Exception {
         mockClient.perform(post("/")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());

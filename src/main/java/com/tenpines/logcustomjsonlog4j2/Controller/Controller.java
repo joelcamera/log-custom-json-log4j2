@@ -1,5 +1,6 @@
 package com.tenpines.logcustomjsonlog4j2.Controller;
 
+import com.tenpines.logcustomjsonlog4j2.logs.CustomMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,6 @@ public class Controller {
     @PostMapping()
     @ResponseStatus(HttpStatus.OK)
     void toLog(@RequestBody Map<String, Object> requestBody) {
-        logger.info("I'm logging :)");
+        logger.info(new CustomMessage(requestBody));
     }
 }

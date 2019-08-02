@@ -11,12 +11,20 @@ import java.util.Map;
 @RestController
 @RequestMapping("/")
 public class Controller {
-    private static final String LOGGER = "LOGGER";
-    private static Logger logger = LogManager.getLogger(LOGGER);
+    private static final String LOGGER_WITH_CUSTOM_LAYOUT = "LOGGER_WITH_CUSTOM_LAYOUT";
+    private static Logger loggerWithCustomLayout = LogManager.getLogger(LOGGER_WITH_CUSTOM_LAYOUT);
+    private static final String LOGGER_WITH_JSON_LAYOUT = "LOGGER_WITH_JSON_LAYOUT";
+    private static Logger loggerWithJsonLayout = LogManager.getLogger(LOGGER_WITH_JSON_LAYOUT);
 
     @PostMapping()
     @ResponseStatus(HttpStatus.OK)
-    void toLog(@RequestBody Map<String, Object> requestBody) {
-        logger.info(new CustomMessage(requestBody));
+    void toLogWithTheCustomLayout(@RequestBody Map<String, Object> requestBody) {
+        loggerWithCustomLayout.info(new CustomMessage(requestBody));
+    }
+
+    @PostMapping("/json-layout")
+    @ResponseStatus(HttpStatus.OK)
+    void toLogWithTheJsonLayout(@RequestBody Map<String, Object> requestBody) {
+        loggerWithJsonLayout.info(requestBody);
     }
 }

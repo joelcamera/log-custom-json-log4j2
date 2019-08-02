@@ -38,27 +38,54 @@ public class ControllerTests {
 
     @Test
     public void whenThePostHasAnEmptyJsonBody_returnsOk() throws Exception {
-        mockClient.perform(post("/")
+        postHasAnEmptyJsonBodyReturnsOk("/");
+    }
+
+    @Test
+    public void whenThePostHasAJsonBodyWithFields_returnsOk() throws Exception {
+        postHasAJsonBodyWithFieldsReturnsOk("/");
+    }
+
+    @Test
+    public void whenThePostHasNonJsonBody_returnsBadRequest() throws Exception {
+        postHasNonJsonBodyReturnsBadRequest("/");
+    }
+
+    @Test
+    public void whenThePostToJsonLayoutHasAnEmptyJsonBody_returnsOk() throws Exception {
+        postHasAnEmptyJsonBodyReturnsOk("/json-layout");
+    }
+
+    @Test
+    public void whenThePostToJsonLayoutHasAJsonBodyWithFields_returnsOk() throws Exception {
+        postHasAJsonBodyWithFieldsReturnsOk("/json-layout");
+    }
+
+    @Test
+    public void whenThePostToJsonLayoutHasNonJsonBody_returnsBadRequest() throws Exception {
+        postHasNonJsonBodyReturnsBadRequest("/json-layout");
+    }
+
+    private void postHasAnEmptyJsonBodyReturnsOk(String anUrl) throws Exception {
+        mockClient.perform(post(anUrl)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(new HashMap<>())))
                 .andExpect(status().isOk());
     }
 
-    @Test
-    public void whenThePostHasAJsonBodyWithFields_returnsOk() throws Exception {
+    private void postHasAJsonBodyWithFieldsReturnsOk(String anUrl) throws Exception {
         Map<String, String> requestBody = new HashMap<String, String>() {{
             put("hello", "world");
         }};
 
-        mockClient.perform(post("/")
+        mockClient.perform(post(anUrl)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(requestBody)))
                 .andExpect(status().isOk());
     }
 
-    @Test
-    public void whenThePostHasNonJsonBody_returnsBadRequest() throws Exception {
-        mockClient.perform(post("/")
+    private void postHasNonJsonBodyReturnsBadRequest(String anUrl) throws Exception {
+        mockClient.perform(post(anUrl)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }

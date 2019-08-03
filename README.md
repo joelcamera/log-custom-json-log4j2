@@ -1,17 +1,18 @@
 # Log Custom JSON Con Log4J2
 
-Este posteo se escribe a partir de una experiencia vivida en donde queríamos loguear
-objetos JSON en una aplicación Java con Spring Boot y utilizamos Log4J2 para hacerlo.
-Nos fue un poco costoso lograrlo y no encontramos mucha información solida,
-por ello la motivación del mismo.
+Escribo este post a partir de una experiencia vivida en donde queríamos loguear
+objetos JSON en una aplicación Java con Spring Boot utilizando Log4J2. Nos fue un
+poco costoso lograrlo debido a que no encontramos mucha información sólida, por ello la motivación del mismo.
 
-Como ejemplo para probar, hice una pequeña aplicación para poder jugar con los datos.
-Ésta se encuentra en https://github.com/joelcamera/log-custom-json-log4j2.
-Se va a estar utilizando la versión *2.1.6.RELEASE* de Spring Boot del mismo que tiene la versión *2.11.2* de Log4J2.
+Como ejemplo, hice una pequeña aplicación para poder probar.
+Ésta se encuentra en el repositorio: https://github.com/joelcamera/log-custom-json-log4j2.
+
+Aquí utilizo las dependencias de Spring Boot Starter en su versión *2.1.6.RELEASE*.
+La versión que estas tienen de Log4J2 es *2.11.2*.
 
 ## Agregar Log4J2 En Spring Boot
 
-Lo primero para agregar Log4J2 en la aplicación hay que excluir de **TODOS** los
+Lo primero, para agregar Log4J2 en la aplicación hay que excluir de **TODOS** los
 starters de Spring Boot, la dependencia spring-boot-starter-logging ya que
 esta importa Logback y no queremos que tome los logs.
 Para excluirlos, se hace de la siguiente forma:
@@ -30,7 +31,7 @@ Para excluirlos, se hace de la siguiente forma:
 </dependency>
 ```
 
-Y luego, agregar la dependencia de Spring Boot _spring-boot-starter-log4j2_:
+Luego, agregamos la dependencia de Spring Boot _spring-boot-starter-log4j2_:
 
 ```
 <dependency>
@@ -52,7 +53,8 @@ layouts debemos crear un archivo de configuración con el nombre _log4j2.*_ dond
 por * puede ser _YAML_, _JSON_, _properties_ o _xml_.
 
     Atención: Intentamos utilizar un .properties pero no nos lo detectaba y no
-    pudimos encontrar bien el porqué. La documentación hasta el momento solo dice que se puede usar.
+    pudimos encontrar bien el porqué. La documentación, hasta el momento de cuando se escribió este post,
+    dice que se pueden utilizar los .properties
 
 En nuestro caso, utilizamos un archivo _YAML_ y lo agregamos en resources.
 Para que Log4J2 pueda entender este archivo también hay que importar la dependencia de Jackson:
@@ -65,7 +67,7 @@ Para que Log4J2 pueda entender este archivo también hay que importar la depende
 </dependency>
 ```
 
-El primer archivo de configuracion nuestro fue de la siguiente forma:
+Nuestro primer archivo de configuracion fue de la siguiente forma:
 
 ```
 Configuration:
@@ -86,8 +88,7 @@ Configuration:
        ref: CONSOLE_ROOT
 ```
 
-Con este, se loguea a consola con el PatternLayout y en una sola línea
-ya que es el root logger.
+Con este, se loguea a consola con el PatternLayout y en una sola línea. El único logger es el root.
 
 ## JSONLayout y Porque No Lo Usamos En Nuestro Caso
 
@@ -132,8 +133,8 @@ Configuration:
 
 Con esto ya tenemos un logger listo para poder usar que loguee JSONs. El problema
 con este layout es que tiene campos definidos y varios de ellos no se pueden quitar.
-Aquí un ejemplo utilizando este logger hecho con el repositorio de ejemplo donde
-envío un JSON en el body:
+Aquí dejo un ejemplo donde, utilizando este logger en el repositorio de ejemplo, envío
+el siguiente JSON en el body:
 
 ```
 {
@@ -147,7 +148,7 @@ El log obtenido es el siguiente:
 {"thread":"http-nio-8080-exec-2","level":"INFO","loggerName":"LOGGER_WITH_JSON_LAYOUT","message":{"field":”value”},"endOfBatch":false,"loggerFqcn":"org.apache.logging.log4j.spi.AbstractLogger","instant":{"epochSecond":1564775298,"nanoOfSecond":516000000},"threadId":25,"threadPriority":5}
 ```
 
-Entonces, lo que loguee aparece en el campo “message” y el resto son
+Lo que loguea aparece en el campo “message” y el resto son
 datos del layout. Pero en nuestro caso no nos interesaban, generan
 ruido y ocupan espacio.
 
@@ -158,7 +159,8 @@ de configuración “objectMessageAsJsonObject: true” como lo pueden ver
 en el YAML nuestro de configuración. Aún así, esta funcionalidad no
 la tienen todas las versiones de Log4J2. Solamente desde la versión
 2.11.0 en adelante. Les dejo el link donde esta el issue resuelto
-https://issues.apache.org/jira/browse/LOG4J2-2190 
+https://issues.apache.org/jira/browse/LOG4J2-2190
+Esto no lo encontramos en la documentación
 ```
 
 ## Cambiar SLF4J por Log4J2 API
@@ -167,8 +169,8 @@ Para loguear JSONs hechos por nosotros primero debemos dejar de usar
 SLF4J como logger y cambiarla por la Log4J2 API ya que esta última
 ofrece algunas características más que la primera. La que más nos
 interesa es la del objeto [Message](https://logging.apache.org/log4j/2.x/manual/messages.html)
-ya que con este podremos crear eljson. Entonces para crear instanciar
-el logger, lo que debe hacerse es utilizar el LogManager con el nombre
+ya que con éste podremos crear el JSON. Entonces para instanciar el logger,
+lo que debe hacerse es utilizar el LogManager con el nombre
 del logger en cuestión en el yaml.
 
 ```
@@ -205,11 +207,11 @@ public class CustomLayout extends AbstractStringLayout {
 }
 ```
 
-Lo importante aquí es el método `#toSerializable` que toma un LogEvent,
-le pide el objeto Message y a este lo formatea para devolver un string.
-Notar también el EOL ya que sino quedarían todos los logs en una sola línea.
+Lo importante aquí es el método `#toSerializable` que tiene de parametro un LogEvent,
+le pedimos el objeto Message y a éste lo formateamos para devolver un string.
+Notar también el _EOL_ ya que sino quedarían todos los logs en una sola línea.
 
-Para utilizarlo vamos a crear un nuevo logger y un nuevo appender en
+Para utilizar el nuevo layout, creamos un nuevo logger y un nuevo appender en
 nuestro YAML de configuración, y este quedaría de la siguiente manera:
 
 ```
@@ -308,8 +310,7 @@ el request y el método `#getFormattedMessage` donde se puede observar que
 generamos el JSON de la forma que queremos y con los parámetros que queremos
 y lo devolvemos como string.
 
-Entonces, en el controller de ejemplo simplemente loggeamos el JSON que
-se recibe de la siguiente manera:
+Entonces, en el controller simplemente logueamos el JSON que se recibe de la siguiente manera:
 
 ```
 @PostMapping()
@@ -336,7 +337,7 @@ Y es el JSON que armamos en el CustomMessage.
 Como último, ¿qué pasaría si no usamos el CustomMessage y solamente
 imprimimos el Map que recibimos como cuerpo del request?
 
-O sea, de a siguiente forma:
+O sea, de la siguiente forma:
 
 ```
 @PostMapping()
@@ -346,6 +347,17 @@ void toLogWithTheCustomLayout(@RequestBody Map<String, Object> requestBody) {
 }
 ```
 
-Lo que se imprimiría es un objeto que no es un JSON válido:
+Lo que se imprimiría es un objeto que no es un JSON válido por la forma
+que tiene:
 
 `{key1=value1, key2=123}`
+
+## Conclusión
+
+Los logs son una parte importante de nuestras aplicaciones. Esto hace que
+poder tener nuestros propios logs armados de la forma en que los
+necesitamos se vuelve esencial.
+
+Si encontraste este post útil o sabes de una forma mas sencilla de poder
+generar este tipo de logs nos gustaría saberlo. No dudes en dejar comentarios!
+
